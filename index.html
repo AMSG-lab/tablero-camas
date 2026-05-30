@@ -4,247 +4,102 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tablero de Camas — Hospitalización</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #060b18;
-    --surface: #0d1425;
-    --surface2: #131c30;
-    --border: rgba(255,255,255,0.06);
-    --border-hi: rgba(255,255,255,0.1);
-    --text: #e2e8f0;
-    --text-2: #94a3b8;
-    --muted: #475569;
-    --red: #f43f5e;
-    --red-light: #fb7185;
-    --red-dark: #e11d48;
-    --red-bg: rgba(244,63,94,0.07);
-    --red-border: rgba(244,63,94,0.22);
-    --amber: #f59e0b;
-    --amber-bg: rgba(245,158,11,0.08);
-    --amber-border: rgba(245,158,11,0.22);
-    --green: #10b981;
-    --font: 'Inter', sans-serif;
-    --mono: 'JetBrains Mono', monospace;
-    --r: 14px;
-    --r-sm: 8px;
+    --bg: #0a0e1a; --surface: #111827; --surface2: #1a2234;
+    --border: rgba(255,255,255,0.07); --text: #e8eaf0; --muted: #6b7280;
+    --red: #ef4444; --red-bg: rgba(239,68,68,0.12); --red-border: rgba(239,68,68,0.35);
+    --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
   }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; flex-direction: column; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-image:
-      radial-gradient(ellipse 55% 35% at 8% 0%, rgba(244,63,94,0.05) 0%, transparent 100%),
-      radial-gradient(ellipse 40% 55% at 92% 100%, rgba(99,102,241,0.04) 0%, transparent 100%);
-  }
-
-  /* ── HEADER ──────────────────────────────────── */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 15px 36px;
-    background: linear-gradient(180deg, rgba(13,20,37,0.98) 0%, rgba(13,20,37,0.92) 100%);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 50;
-    backdrop-filter: blur(16px);
-  }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 20px 36px; border-bottom: 1px solid var(--border); background: var(--surface); }
   .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo-icon {
-    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-    background: linear-gradient(135deg, rgba(244,63,94,0.18), rgba(244,63,94,0.06));
-    border: 1px solid var(--red-border);
-    display: flex; align-items: center; justify-content: center; font-size: 17px;
-  }
-  .header-titles {}
-  .header-title { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; }
-  .header-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+  .pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+  .header-title { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 20px; }
+  .clock { font-family: var(--mono); font-size: 22px; font-weight: 500; letter-spacing: 1px; }
+  .status-bar { font-size: 12px; color: var(--muted); text-align: right; margin-top: 3px; }
 
-  .header-right { display: flex; align-items: center; gap: 14px; }
-  .live-indicator { display: flex; align-items: center; gap: 7px; }
-  .pulse-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--red);
-    animation: pulse-red 2s infinite; flex-shrink: 0;
-  }
-  .live-text { font-size: 11px; font-weight: 700; color: var(--red); letter-spacing: 1.5px; text-transform: uppercase; }
+  .sound-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 8px; font-family: var(--font); font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .sound-btn.active { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.08); }
 
-  .clock-block { display: flex; flex-direction: column; align-items: flex-end; }
-  .clock {
-    font-family: var(--mono); font-size: 22px; font-weight: 500;
-    color: var(--text); letter-spacing: 1.5px;
-  }
-  .sync-status {
-    font-size: 10.5px; color: var(--muted); margin-top: 3px;
-    display: flex; align-items: center; gap: 5px;
-  }
-  .sync-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse-green 2.5s infinite; flex-shrink: 0; }
-
-  .sound-btn {
-    background: var(--surface2); border: 1px solid var(--border-hi);
-    color: var(--text-2); padding: 7px 13px; border-radius: var(--r-sm);
-    font-family: var(--font); font-size: 12px; font-weight: 500;
-    cursor: pointer; transition: all 0.15s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .sound-btn:hover { border-color: var(--red-border); color: var(--text); }
-  .sound-btn.active { border-color: var(--red-border); color: var(--red); background: var(--red-bg); }
-
-  @keyframes pulse-red {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
-    50%       { box-shadow: 0 0 0 6px rgba(244,63,94,0.18); }
-  }
-  @keyframes pulse-green {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
-    50%       { box-shadow: 0 0 0 5px rgba(16,185,129,0.15); }
-  }
-
-  /* ── BANNER ──────────────────────────────────── */
   .banner {
-    display: flex; align-items: flex-start; gap: 11px;
-    padding: 11px 36px;
-    background: rgba(99,102,241,0.05);
-    border-bottom: 1px solid rgba(99,102,241,0.1);
-    font-size: 12px; color: #a5b4fc; line-height: 1.65;
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 36px; background: rgba(99,102,241,0.07);
+    border-bottom: 1px solid rgba(99,102,241,0.18);
+    font-size: 13px; color: #a5b4fc; line-height: 1.5;
   }
-  .banner-icon { font-size: 13px; margin-top: 2px; flex-shrink: 0; opacity: 0.7; }
+  .banner-icon { font-size: 15px; margin-top: 1px; flex-shrink: 0; }
 
-  /* ── MAIN ────────────────────────────────────── */
-  main { flex: 1; padding: 28px 36px; }
-  .floor-section { margin-bottom: 32px; }
-  .floor-label {
-    font-size: 9.5px; font-weight: 700; letter-spacing: 2.5px;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
-  }
+  main { flex: 1; padding: 32px 36px; }
+  .floor-section { margin-bottom: 40px; }
+  .floor-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
   .floor-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .floor-count {
-    font-family: var(--mono); font-size: 10px; font-weight: 500;
-    color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border);
-    padding: 2px 8px; border-radius: 20px; letter-spacing: 0;
-  }
 
-  .beds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 12px; }
+  .beds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
 
-  /* ── BED CARD ────────────────────────────────── */
   .bed-card {
-    border-radius: var(--r); padding: 18px 18px 16px;
-    border: 1px solid var(--red-border); background: var(--red-bg);
-    display: flex; flex-direction: column; align-items: flex-start;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative; overflow: hidden;
-    cursor: default;
+    border-radius: 14px; padding: 24px 20px;
+    border: 1px solid var(--red-border);
+    background: var(--red-bg);
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: transform 0.2s;
   }
-  .bed-card::after {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
-    background: linear-gradient(90deg, var(--red-dark) 0%, var(--red-light) 50%, transparent 100%);
-  }
-  .bed-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 28px rgba(244,63,94,0.12);
-  }
-  .bed-card.nueva { animation: entrada 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  @keyframes entrada {
-    0%   { transform: scale(0.9) translateY(8px); opacity: 0; }
-    100% { transform: scale(1) translateY(0);     opacity: 1; }
-  }
+  .bed-card:hover { transform: translateY(-2px); }
+  .bed-card.nueva { animation: entrada 0.6s ease-out; }
+  @keyframes entrada { 0% { transform: scale(0.88); opacity: 0; } 60% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
 
-  .bed-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(244,63,94,0.55); margin-bottom: 4px; }
-  .bed-number {
-    font-family: var(--mono); font-size: 42px; font-weight: 500;
-    color: var(--red-light); line-height: 1; margin-bottom: 3px;
-  }
-  .bed-floor { font-size: 12px; color: rgba(244,63,94,0.65); margin-bottom: 10px; }
-
-  .bed-meta { display: flex; flex-direction: column; gap: 5px; width: 100%; margin-bottom: 12px; }
-  .bed-time { font-size: 10.5px; color: var(--muted); font-family: var(--mono); }
-  .bed-elapsed {
-    font-size: 10px; font-family: var(--mono);
-    color: var(--amber); background: var(--amber-bg);
-    border: 1px solid var(--amber-border);
-    padding: 2px 7px; border-radius: 5px; align-self: flex-start;
-  }
+  .bed-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(239,68,68,0.7); }
+  .bed-number { font-family: var(--mono); font-size: 36px; font-weight: 500; color: #ef4444; line-height: 1; }
+  .bed-floor { font-size: 13px; color: rgba(239,68,68,0.8); }
+  .bed-time { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
 
   .badge-pendiente {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.25);
-    color: var(--red-light); font-size: 10px; font-weight: 500;
+    margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+    color: #ef4444; font-size: 11px; font-weight: 500;
     padding: 4px 10px; border-radius: 20px; letter-spacing: 0.3px;
   }
-  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pulse-red 1.5s infinite; }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #ef4444; animation: pulse 1.5s infinite; }
 
-  /* ── STATS BAR ───────────────────────────────── */
-  .stats-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 36px;
-    background: var(--surface); border-top: 1px solid var(--border);
-  }
+  .stats-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 36px; background: var(--surface); border-top: 1px solid var(--border); }
   .stat-group { display: flex; gap: 32px; }
-  .stat { display: flex; align-items: center; gap: 10px; }
-  .stat-icon {
-    width: 34px; height: 34px; border-radius: var(--r-sm);
-    background: var(--red-bg); border: 1px solid var(--red-border);
-    display: flex; align-items: center; justify-content: center; font-size: 14px;
-  }
-  .stat-num { font-size: 22px; font-weight: 600; font-family: var(--mono); color: var(--red-light); line-height: 1; }
-  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .last-update { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+  .stat { text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 600; font-family: var(--mono); color: #ef4444; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .last-update { font-size: 12px; color: var(--muted); font-family: var(--mono); }
 
-  /* ── TOAST ───────────────────────────────────── */
-  .toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--surface2); border: 1px solid var(--red-border);
-    color: var(--text); padding: 12px 18px; border-radius: var(--r-sm);
-    font-size: 13px; font-weight: 500;
-    opacity: 0; transform: translateY(10px);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none; z-index: 100;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
-  }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid rgba(239,68,68,0.35); color: #ef4444; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; z-index: 100; }
   .toast.show { opacity: 1; transform: translateY(0); }
-
-  /* ── EMPTY STATE ─────────────────────────────── */
-  .empty-state {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 80px; color: var(--muted); gap: 10px; text-align: center;
-  }
-  .empty-icon { font-size: 38px; opacity: 0.25; margin-bottom: 4px; }
-  .empty-title { font-size: 15px; font-weight: 500; color: var(--text-2); }
-  .empty-sub { font-size: 12.5px; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-left">
-    <div class="logo-icon">🏥</div>
-    <div class="header-titles">
+    <div class="pulse-dot"></div>
+    <div>
       <div class="header-title">Tablero de Camas — Pendientes de Limpieza</div>
-      <div class="header-sub">Servicio de Hospitalización · Actualización automática cada 30 s</div>
+      <div class="header-sub">Servicio de Hospitalización · Actualización automática cada 30 segundos</div>
     </div>
   </div>
   <div class="header-right">
-    <div class="live-indicator">
-      <div class="pulse-dot"></div>
-      <span class="live-text">En vivo</span>
-    </div>
-    <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">🔔 Alerta activa</button>
-    <div class="clock-block">
+    <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">🔔 Alerta sonora activa</button>
+    <div>
       <div class="clock" id="clock">--:--:--</div>
-      <div class="sync-status">
-        <span class="sync-dot"></span>
-        <span id="statusBar">Sincronizado con Google Sheets</span>
-      </div>
+      <div class="status-bar" id="statusBar">Sincronizado con Google Sheets</div>
     </div>
   </div>
 </header>
 
 <div class="banner">
   <span class="banner-icon">ℹ️</span>
-  <span>Los registros mostrados corresponden a una <strong>simulación representativa</strong> basada en la estructura real del formulario institucional. En operación, cada entrada refleja el reporte generado por enfermería en el momento del egreso del paciente, con sincronización automática desde Google Sheets.</span>
+  <span>Los registros mostrados corresponden a una <strong>simulación representativa</strong> basada en la estructura real del formulario institucional. En operación, cada entrada refleja el reporte generado por el cuerpo de trabajadores en el hospital en el momento del egreso del paciente, con sincronización automática desde Google Sheets.</span>
 </div>
 
 <main id="main"></main>
@@ -252,11 +107,8 @@
 <div class="stats-bar">
   <div class="stat-group">
     <div class="stat">
-      <div class="stat-icon">🛏️</div>
-      <div>
-        <div class="stat-num" id="countTotal">0</div>
-        <div class="stat-label">Camas pendientes</div>
-      </div>
+      <div class="stat-num" id="countTotal">0</div>
+      <div class="stat-label">Camas pendientes</div>
     </div>
   </div>
   <div class="last-update" id="lastUpdate">—</div>
@@ -265,7 +117,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── DATOS ── (reemplazar por fetch a Google Sheets en producción)
 const DATOS = [
   { timestamp: '30/05/2026 1:03:38', piso: 'Piso 1', habitacion: '103' },
   { timestamp: '30/05/2026 1:04:11', piso: 'Piso 2', habitacion: '203' },
@@ -317,27 +168,14 @@ function toggleSound() {
   interacted = true;
   soundEnabled = !soundEnabled;
   const btn = document.getElementById('soundBtn');
-  btn.textContent = soundEnabled ? '🔔 Alerta activa' : '🔕 Silenciado';
+  btn.textContent = soundEnabled ? '🔔 Alerta sonora activa' : '🔕 Alerta sonora silenciada';
   btn.classList.toggle('active', soundEnabled);
   if (soundEnabled) playAlert();
 }
 
-function getElapsed(timestamp) {
-  if (!timestamp) return '';
-  const parts = timestamp.split(' ');
-  if (parts.length < 2) return '';
-  const [d, m, y] = parts[0].split('/');
-  const dt = new Date(`${y}-${m}-${d}T${parts[1]}`);
-  const mins = Math.floor((Date.now() - dt) / 60000);
-  if (isNaN(mins) || mins < 0) return '';
-  if (mins < 60) return `${mins} min pendiente`;
-  const h = Math.floor(mins / 60), rm = mins % 60;
-  return `${h}h ${rm}m pendiente`;
-}
-
 function cargarDatos() {
   const nuevas = [];
-  DATOS.forEach(row => {
+  DATOS.forEach((row, i) => {
     const id = `${row.piso}-${row.habitacion}`;
     if (!beds[id]) {
       beds[id] = { id, number: row.habitacion, floor: row.piso, timestamp: row.timestamp };
@@ -346,7 +184,7 @@ function cargarDatos() {
   });
   if (nuevas.length) {
     playAlert();
-    showToast(`🛏️ Nueva cama registrada: Hab. ${nuevas.map(id => beds[id].number).join(', ')}`);
+    showToast(`Nueva cama registrada: Hab. ${nuevas.map(id => beds[id].number).join(', ')}`);
   }
   renderBeds(nuevas);
   updateStats();
@@ -361,18 +199,13 @@ function renderBeds(newIds = []) {
   });
 
   if (Object.keys(byFloor).length === 0) {
-    main.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🛏️</div>
-        <div class="empty-title">Sin camas pendientes</div>
-        <div class="empty-sub">No hay registros de limpieza en este momento.</div>
-      </div>`;
+    main.innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted);font-size:14px;">No hay camas registradas pendientes de limpieza.</div>`;
     return;
   }
 
   main.innerHTML = Object.entries(byFloor).sort().map(([floor, floorBeds]) => `
     <div class="floor-section">
-      <div class="floor-label">${floor}<span class="floor-count">${floorBeds.length}</span></div>
+      <div class="floor-label">${floor}</div>
       <div class="beds-grid">
         ${floorBeds.map(b => bedCard(b, newIds.includes(b.id))).join('')}
       </div>
@@ -382,16 +215,12 @@ function renderBeds(newIds = []) {
 
 function bedCard(bed, isNew) {
   const timeStr = bed.timestamp ? bed.timestamp.split(' ')[1]?.substring(0, 5) || '' : '';
-  const elapsed = getElapsed(bed.timestamp);
   return `
     <div class="bed-card${isNew ? ' nueva' : ''}">
       <div class="bed-label">Habitación</div>
       <div class="bed-number">${bed.number}</div>
       <div class="bed-floor">${bed.floor}</div>
-      <div class="bed-meta">
-        ${timeStr  ? `<div class="bed-time">Reportada ${timeStr}</div>` : ''}
-        ${elapsed  ? `<div class="bed-elapsed">⏱ ${elapsed}</div>`     : ''}
-      </div>
+      ${timeStr ? `<div class="bed-time">Reportada a las ${timeStr}</div>` : ''}
       <div class="badge-pendiente"><span class="badge-dot"></span>Pendiente de limpieza</div>
     </div>
   `;
@@ -401,7 +230,7 @@ function updateStats() {
   const total = Object.values(beds).length;
   document.getElementById('countTotal').textContent = total;
   const now = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  document.getElementById('lastUpdate').textContent = `Últ. actualización: ${now}`;
+  document.getElementById('lastUpdate').textContent = `Última actualización: ${now}`;
 }
 
 function showToast(msg) {
