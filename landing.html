@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUN · Gestión de Camas · Grupo 10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#C8102E;--red-d:#A00D26;--red-s:#FFF0F2;--red-m:#FDDDE3;
+  --green:#1D9E75;--green-s:#E6F8F2;
+  --amber:#BA7517;--amber-s:#FEF7E8;
+  --purple:#534AB7;--purple-s:#EFEDFD;
+  --danger:#D93025;--danger-s:#FDECEA;
+  --c50:#F8FAFC;--c100:#F1F4F8;--c200:#E4E9F0;--c300:#CBD5E1;
+  --c400:#94A3B8;--c500:#64748B;--c700:#334155;--c900:#0F172A;
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;
+}
+body{
+  font-family:'Inter',-apple-system,sans-serif;
+  background:#E8EDF5;
+  min-height:100vh;
+  padding:2rem 1rem 4rem;
+  display:flex;align-items:flex-start;justify-content:center;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Shell ── */
+.app{width:100%;max-width:780px;background:#fff;border-radius:var(--r-xl);box-shadow:0 8px 40px rgba(15,23,42,.11),0 2px 8px rgba(15,23,42,.06);overflow:hidden}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--c200)}
+.logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(145deg,var(--red),var(--red-d));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(200,16,46,.32);flex-shrink:0}
+.logo span{color:#fff;font-size:13px;font-weight:700;letter-spacing:.03em}
+.htitle{font-size:15px;font-weight:600;color:var(--c900);line-height:1.2}
+.hsub{font-size:11px;color:var(--c400);margin-top:1px}
+.hclock{margin-left:auto;display:flex;align-items:center;gap:7px;background:var(--c100);border-radius:20px;padding:6px 13px;font-size:13px;font-weight:500;color:var(--c500);font-variant-numeric:tabular-nums}
+.hdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2.2s ease-in-out infinite}
+
+/* ── KPI ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:18px 24px 4px}
+.kpi{padding:14px 15px;border:1px solid var(--c200);border-radius:var(--r-md);background:var(--c50)}
+.kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.kpi-n{font-size:28px;font-weight:700;line-height:1;color:var(--c900);font-variant-numeric:tabular-nums}
+.kpi-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.ki-r{background:var(--red-s);color:var(--red)}
+.ki-g{background:var(--green-s);color:var(--green)}
+.ki-a{background:var(--amber-s);color:var(--amber)}
+.kpi-l{font-size:11px;font-weight:500;color:var(--c400);text-transform:uppercase;letter-spacing:.06em}
+.kpi-track{height:3px;background:var(--c200);border-radius:2px;margin-top:8px;overflow:hidden}
+.kpi-fill{height:100%;border-radius:2px;transition:width .7s ease,background .4s}
+
+/* ── Tab bar ── */
+.tabwrap{padding:16px 24px 0}
+.tabs{display:flex;background:var(--c100);border-radius:var(--r-sm);padding:3px;gap:2px;margin-bottom:20px}
+.tab{flex:1;padding:9px 16px;border:none;cursor:pointer;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;color:var(--c500);background:transparent;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .18s}
+.tab.on{background:#fff;color:var(--red);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tab:not(.on):hover{background:var(--c200)}
+
+.tc{display:none;padding:0 24px 24px}
+.tc.on{display:block}
+
+/* ── Section label ── */
+.slbl{font-size:11px;font-weight:600;color:var(--c400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--c200)}
+
+/* ── Floor pills ── */
+.fpills{display:flex;gap:6px;margin-bottom:14px}
+.fpill{padding:5px 16px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--c300);cursor:pointer;background:#fff;color:var(--c500);transition:all .15s}
+.fpill.on{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 2px 6px rgba(200,16,46,.22)}
+
+/* ── Bed grid ── */
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-bottom:20px}
+.bc{border-radius:var(--r-md);padding:10px 6px 9px;text-align:center;cursor:pointer;border:1.5px solid var(--c200);background:#fff;transition:border-color .15s,box-shadow .15s,transform .15s;position:relative;user-select:none}
+.bc:not(.b-empty):not(.b-blk):hover{border-color:var(--c400);box-shadow:0 2px 8px rgba(0,0,0,.07);transform:translateY(-1px)}
+.bc.b-occ{background:var(--c50)}
+.bc.b-sel{border-color:var(--red)!important;border-width:2px;background:var(--red-s);box-shadow:0 0 0 3px rgba(200,16,46,.10)}
+.bc.b-empty{border-style:dashed;opacity:.36;cursor:default;pointer-events:none}
+.bc.b-rec{border-color:var(--green);border-width:2px;background:var(--green-s)}
+.bc.b-rec:hover{box-shadow:0 0 0 3px rgba(29,158,117,.12)}
+.bc.b-cau{border-color:var(--amber);border-width:2px;background:var(--amber-s)}
+.bc.b-blk{border-color:var(--c200);background:var(--c50);opacity:.28;cursor:not-allowed;pointer-events:none}
+
+.bav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin:0 auto 5px}
+.av-M{background:#DBEAFE;color:#1D4ED8}
+.av-F{background:#FCE7F3;color:#9D174D}
+.av-free{background:var(--c100);color:var(--c400);font-size:15px}
+.av-rec{background:var(--green-s);color:var(--green);font-size:15px}
+.av-cau{background:var(--amber-s);color:var(--amber);font-size:15px}
+.av-blk{background:var(--c100);color:var(--c300);font-size:15px}
+
+.bnum{font-size:12px;font-weight:600;color:var(--c900)}
+.bc.b-sel .bnum{color:var(--red)}
+.bc.b-rec .bnum{color:var(--green)}
+.bc.b-cau .bnum{color:var(--amber)}
+.bname{font-size:9.5px;color:var(--c400);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72px;margin-left:auto;margin-right:auto}
+.bdot{position:absolute;top:7px;right:7px;width:6px;height:6px;border-radius:50%}
+
+/* ── Confirm panel ── */
+.cpanel{border:1px solid var(--c200);border-radius:var(--r-md);overflow:hidden;margin-bottom:20px}
+.cphead{padding:11px 16px;background:var(--c50);border-bottom:1px solid var(--c200);font-size:12px;font-weight:600;color:var(--c500);display:flex;align-items:center;gap:7px}
+.cempty{padding:32px 20px;text-align:center;color:var(--c400);background:var(--c50)}
+.cempty i{font-size:28px;display:block;margin:0 auto 8px;color:var(--c300)}
+.cempty p{font-size:12px;line-height:1.5}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--c100)}
+.crow:last-child{border-bottom:none}
+.ck{font-size:12px;color:var(--c400)}
+.cv{font-size:13px;font-weight:500;color:var(--c900)}
+.cv.hi{color:var(--red);font-weight:600}
+
+/* ── Recipients ── */
+.recips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.rcip{border:1px solid var(--c200);border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;gap:10px;background:#fff;transition:border-color .15s,background .15s}
+.rcip:hover{border-color:var(--c300);background:var(--c50)}
+.rcico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.rcname{font-size:12px;font-weight:600;color:var(--c900)}
+.rcnum{font-size:11px;color:var(--c400);margin-top:1px;font-variant-numeric:tabular-nums}
+
+/* ── Buttons ── */
+.send-btn{width:100%;padding:13px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;font-family:inherit;font-size:14px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .18s;box-shadow:0 3px 10px rgba(200,16,46,.28);letter-spacing:.01em}
+.send-btn:not(:disabled):hover{box-shadow:0 5px 18px rgba(200,16,46,.42);transform:translateY(-1px)}
+.send-btn:not(:disabled):active{transform:translateY(0)}
+.send-btn:disabled{background:var(--c200);color:var(--c400);box-shadow:none;cursor:default}
+
+.analyze-btn{padding:10px 20px;border-radius:var(--r-sm);background:var(--purple);color:#fff;font-family:inherit;font-size:13px;font-weight:600;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .18s;box-shadow:0 2px 8px rgba(83,74,183,.28)}
+.analyze-btn:hover{box-shadow:0 4px 14px rgba(83,74,183,.38);transform:translateY(-1px)}
+
+.assign-btn{padding:6px 14px;border-radius:6px;background:var(--purple);color:#fff;font-family:inherit;font-size:12px;font-weight:500;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s;margin-top:8px}
+.assign-btn:hover{opacity:.88}
+
+/* ── Alerts ── */
+.alert{border-radius:var(--r-sm);padding:10px 14px;font-size:12px;font-weight:500;display:flex;gap:9px;align-items:flex-start;margin-bottom:10px;line-height:1.5}
+.alert i{flex-shrink:0;font-size:15px;margin-top:1px}
+.a-warn{background:var(--amber-s);border:1px solid #D4A010;color:#7A4C0B}
+.a-danger{background:var(--danger-s);border:1px solid #E57373;color:#821111}
+
+/* ── Legend ── */
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.litem{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--c500)}
+.lpip{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* ── Rec list ── */
+.rlist{border:1px solid var(--c200);border-radius:var(--r-md);overflow:hidden;margin-bottom:20px}
+.rlhead{padding:10px 14px;background:var(--c50);border-bottom:1px solid var(--c200);font-size:12px;font-weight:600;color:var(--c500);display:flex;align-items:center;gap:7px}
+.rempty{padding:30px 20px;text-align:center;color:var(--c400);font-size:12px}
+.rempty i{font-size:24px;display:block;margin:0 auto 8px;color:var(--c300)}
+.rrow{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--c100)}
+.rrow:last-child{border-bottom:none}
+.rbadge{min-width:72px;text-align:center;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;flex-shrink:0}
+.rb-ok{background:var(--green-s);color:var(--green)}
+.rb-warn{background:var(--amber-s);color:var(--amber)}
+.rb-blk{background:var(--danger-s);color:var(--danger)}
+.rnum{font-size:13px;font-weight:600;color:var(--c900)}
+.rroom{font-size:11px;color:var(--c400);margin-top:2px}
+.rtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.rtag{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.rt-ok{background:var(--green-s);color:var(--green)}
+.rt-warn{background:var(--amber-s);color:var(--amber)}
+.rt-block{background:var(--danger-s);color:var(--danger)}
+.rt-n{background:var(--c100);color:var(--c500)}
+
+/* ── Form ── */
+.fcard{border:1px solid var(--c200);border-radius:var(--r-md);padding:16px 18px;background:#fff;margin-bottom:16px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:11px;font-weight:600;color:var(--c500);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select{font-size:13px;font-family:inherit;padding:9px 11px;min-height:44px;border-radius:var(--r-sm);border:1.5px solid var(--c200);background:#fff;color:var(--c900);width:100%;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none;cursor:pointer}
+button,.bc,.fpill,.tab,.chklab,.rcip{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.field input{cursor:text}
+.field input:focus,.field select:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(83,74,183,.09)}
+.field input::placeholder{color:var(--c400)}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%2394A3B8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:16px;padding-right:32px}
+
+.chkgrp{display:flex;flex-wrap:wrap;gap:6px}
+.chklab{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--c500);font-weight:500;padding:6px 11px;border-radius:6px;border:1px solid var(--c200);cursor:pointer;transition:all .15s;user-select:none}
+.chklab:hover{border-color:var(--c300);background:var(--c50)}
+.chklab input{accent-color:var(--red);width:13px;height:13px}
+
+/* ── Toast ── */
+.toast{border-radius:var(--r-sm);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;margin-bottom:16px;animation:tin .25s ease}
+.toast-ok{background:var(--green-s);border:1px solid #4ABFA0;color:#0D5E45}
+
+.hidden{display:none!important}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  body{padding:0;background:#fff}
+  .app{border-radius:0;min-height:100vh;box-shadow:none}
+  .hdr{padding:14px 16px;gap:10px}
+  .logo{width:36px;height:36px;border-radius:9px}
+  .logo span{font-size:11px}
+  .htitle{font-size:14px}
+  .hsub{display:none}
+  .hclock{padding:5px 10px;font-size:12px}
+  .hdot{width:6px;height:6px}
+  .kpi-strip{padding:12px 16px 4px;gap:7px}
+  .kpi{padding:11px 12px}
+  .kpi-n{font-size:22px}
+  .kpi-ico{width:28px;height:28px;font-size:13px}
+  .kpi-l{font-size:10px}
+  .tabwrap{padding:12px 16px 0}
+  .tabs{border-radius:7px}
+  .tab{padding:8px 12px;font-size:12px}
+  .tc{padding:0 16px 20px}
+  .slbl{font-size:10px;letter-spacing:.05em}
+  .bgrid{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin-bottom:16px}
+  .bc{padding:8px 5px 7px;border-radius:10px}
+  .bav{width:26px;height:26px;font-size:10px;margin-bottom:4px}
+  .bnum{font-size:11px}
+  .bname{font-size:9px}
+  .recips{grid-template-columns:1fr;gap:6px}
+  .rcip{padding:9px 11px}
+  .rcico{width:30px;height:30px;font-size:13px}
+  .fgrid{grid-template-columns:1fr}
+  .fcard{padding:14px 15px}
+  .chklab{font-size:11px;padding:5px 9px}
+  .cpanel{margin-bottom:16px}
+  .cempty{padding:24px 16px}
+  .crow{padding:8px 14px}
+  .send-btn{font-size:13px;padding:12px}
+  .analyze-btn{font-size:12px;padding:9px 16px;width:100%;justify-content:center}
+  .assign-btn{font-size:11px;padding:5px 11px}
+  .rlist{margin-bottom:16px}
+  .rrow{gap:8px;padding:10px 12px}
+  .rbadge{min-width:60px;font-size:10px;padding:4px 6px}
+  .rnum{font-size:12px}
+  .rroom{font-size:10px}
+  .legend{gap:10px}
+  .litem{font-size:10px}
+  .toast{font-size:12px;padding:10px 14px}
+  .fpill{padding:4px 13px;font-size:11px}
+}
+@media(max-width:380px){
+  .kpi-n{font-size:19px}
+  .kpi-l{font-size:9px}
+  .bgrid{grid-template-columns:repeat(auto-fill,minmax(58px,1fr))}
+  .tab{font-size:11px;gap:5px}
+}
+</style>
+</head>
+<body>
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Panel de gestión hospitalaria — Hospital Universidad del Norte</h1>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="logo"><span>HUN</span></div>
+    <div>
+      <div class="htitle">Sistema de gestión hospitalaria</div>
+      <div class="hsub">Red interna · Hospital Universidad del Norte · Barranquilla</div>
+      <div class="hsub" style="margin-top:2px;opacity:.75">Grupo 10 · Ingeniería Industrial</div>
+    </div>
+    <div class="hclock">
+      <span class="hdot"></span>
+      <span id="clock"></span>
+    </div>
+  </header>
+
+  <!-- KPIs -->
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="kpi-top">
+        <div class="kpi-n" id="statOcc">—</div>
+        <div class="kpi-ico ki-r"><i class="ti ti-bed"></i></div>
+      </div>
+      <div class="kpi-l">Camas ocupadas</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top">
+        <div class="kpi-n" id="statFree">—</div>
+        <div class="kpi-ico ki-g"><i class="ti ti-circle-check"></i></div>
+      </div>
+      <div class="kpi-l">Disponibles</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top">
+        <div class="kpi-n" id="statPct">—</div>
+        <div class="kpi-ico ki-a"><i class="ti ti-percentage"></i></div>
+      </div>
+      <div class="kpi-l">Ocupación</div>
+      <div class="kpi-track"><div class="kpi-fill" id="kpiFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabwrap">
+    <div class="tabs">
+      <button class="tab on" onclick="switchTab('egreso',this)"><i class="ti ti-logout"></i> Egreso</button>
+      <button class="tab" onclick="switchTab('ingreso',this)"><i class="ti ti-login"></i> Ingreso</button>
+    </div>
+  </div>
+
+  <!-- ════ TAB EGRESO ════ -->
+  <div id="tc-egreso" class="tc on">
+    <div class="fpills" id="fpE">
+      <div class="fpill on" onclick="setFloorE(1,this)">Piso 1</div>
+      <div class="fpill" onclick="setFloorE(2,this)">Piso 2</div>
+    </div>
+
+    <div class="slbl">Seleccionar cama para egreso</div>
+    <div class="bgrid" id="bgE"></div>
+
+    <div id="toastE" class="toast toast-ok hidden">
+      <i class="ti ti-circle-check" style="font-size:18px;flex-shrink:0"></i>
+      <span id="tmsgE"></span>
+    </div>
+
+    <div class="slbl">Confirmación de egreso</div>
+    <div class="cpanel">
+      <div class="cempty" id="cemptyE">
+        <i class="ti ti-hand-click"></i>
+        <p>Seleccione una cama ocupada<br>para ver el resumen del egreso</p>
+      </div>
+      <div id="cdetE" style="display:none">
+        <div class="cphead"><i class="ti ti-file-text" style="font-size:13px"></i> Resumen del egreso</div>
+        <div class="crow"><span class="ck">Cama</span><span class="cv hi" id="confCama">—</span></div>
+        <div class="crow"><span class="ck">Paciente</span><span class="cv" id="confPac">—</span></div>
+        <div class="crow"><span class="ck">Piso</span><span class="cv" id="confPiso">—</span></div>
+        <div class="crow"><span class="ck">Hora de nota</span><span class="cv" id="confHora">—</span></div>
+      </div>
+    </div>
+
+    <div class="slbl">Destinatarios de notificación</div>
+    <div class="recips">
+      <div class="rcip">
+        <div class="rcico" style="background:var(--red-s);color:var(--red)"><i class="ti ti-nurse"></i></div>
+        <div><div class="rcname">Enfermería jefe</div><div class="rcnum">+57 300 001 0001</div></div>
+      </div>
+      <div class="rcip">
+        <div class="rcico" style="background:var(--green-s);color:var(--green)"><i class="ti ti-receipt"></i></div>
+        <div><div class="rcname">Facturación</div><div class="rcnum">+57 300 001 0002</div></div>
+      </div>
+      <div class="rcip">
+        <div class="rcico" style="background:var(--amber-s);color:var(--amber)"><i class="ti ti-stethoscope"></i></div>
+        <div><div class="rcname">Auxiliar clínico</div><div class="rcnum">+57 300 001 0003</div></div>
+      </div>
+      <div class="rcip">
+        <div class="rcico" style="background:var(--purple-s);color:var(--purple)"><i class="ti ti-tools"></i></div>
+        <div><div class="rcname">Servicios generales</div><div class="rcnum">+57 300 001 0004</div></div>
+      </div>
+    </div>
+
+    <button class="send-btn" id="sendE" disabled onclick="sendEgreso()">
+      <i class="ti ti-brand-whatsapp" style="font-size:18px"></i>
+      Confirmar egreso y notificar
+    </button>
+  </div>
+
+  <!-- ════ TAB INGRESO ════ -->
+  <div id="tc-ingreso" class="tc">
+    <div class="slbl">Datos del paciente entrante</div>
+    <div class="fcard">
+      <div class="fgrid">
+        <div class="field" style="grid-column:1/-1">
+          <span class="flbl">Nombre del paciente</span>
+          <input type="text" id="ingNombre" placeholder="Apellido, Nombre">
+        </div>
+        <div class="field">
+          <span class="flbl">Edad (años)</span>
+          <input type="number" id="ingEdad" placeholder="ej. 42" min="0" max="120">
+        </div>
+        <div class="field">
+          <span class="flbl">Sexo biológico</span>
+          <select id="ingSexo">
+            <option value="">Seleccionar...</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <span class="flbl">Diagnóstico / motivo de ingreso</span>
+          <select id="ingDiag">
+            <option value="">Seleccionar...</option>
+            <option value="general">General (médico/quirúrgico)</option>
+            <option value="materna">Materna / obstétrica</option>
+            <option value="aborto">Aborto / pérdida gestacional</option>
+            <option value="infeccioso">Enfermedad infecciosa (requiere aislamiento)</option>
+            <option value="psiquiatrico">Trastorno psiquiátrico / conducta</option>
+            <option value="pediatrico">Pediátrico general</option>
+            <option value="oncologico">Oncológico</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <span class="flbl">Criterios psicosociales <span style="font-weight:400;color:var(--c400);text-transform:none;letter-spacing:0">(marcar si aplica)</span></span>
+          <div class="chkgrp">
+            <label class="chklab"><input type="checkbox" id="pAbuso"> Víctima de abuso / violencia</label>
+            <label class="chklab"><input type="checkbox" id="pBala"> Herido por arma (conflicto)</label>
+            <label class="chklab"><input type="checkbox" id="pSalud"> Condición de salud mental activa</label>
+            <label class="chklab"><input type="checkbox" id="pLegal"> Situación legal o custodia</label>
+          </div>
+        </div>
+      </div>
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyzeIngreso()">
+        <i class="ti ti-search"></i> Analizar disponibilidad y recomendar
+      </button>
+    </div>
+
+    <div id="recWrap" class="hidden">
+      <div id="alertsWrap"></div>
+      <div class="slbl">Mapa de camas</div>
+      <div class="legend">
+        <div class="litem"><div class="lpip" style="background:var(--green)"></div> Recomendada</div>
+        <div class="litem"><div class="lpip" style="background:var(--amber)"></div> Con observación</div>
+        <div class="litem"><div class="lpip" style="background:var(--danger)"></div> No compatible</div>
+        <div class="litem"><div class="lpip" style="background:var(--c200)"></div> Ocupada</div>
+      </div>
+      <div class="fpills" id="fpI">
+        <div class="fpill on" onclick="setFloorI(1,this)">Piso 1</div>
+        <div class="fpill" onclick="setFloorI(2,this)">Piso 2</div>
+      </div>
+      <div class="bgrid" id="bgI"></div>
+      <div class="slbl">Evaluación detallada</div>
+      <div class="rlist">
+        <div class="rlhead"><i class="ti ti-list-check" style="font-size:13px"></i> Recomendaciones por cama</div>
+        <div class="rempty" id="recEmpty"><i class="ti ti-search-off"></i> Las camas disponibles aparecerán aquí</div>
+        <div id="recList"></div>
+      </div>
+    </div>
+
+    <div id="toastI" class="toast toast-ok hidden">
+      <i class="ti ti-circle-check" style="font-size:18px;flex-shrink:0"></i>
+      <span id="tmsgI"></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DIAG_DOT={general:'#60A5FA',materna:'#F472B6',aborto:'#94A3B8',infeccioso:'#F87171',psiquiatrico:'#FBBF24',pediatrico:'#22D3EE',oncologico:'#A78BFA'};
+
+const bedsFloor1=[
+  {num:"101A",name:"García, L.",occ:true,sex:"F",age:45,diag:"general",psico:false},
+  {num:"101B",name:"Pérez, M.",occ:true,sex:"F",age:38,diag:"materna",psico:false},
+  {num:"102A",name:"Torres, R.",occ:true,sex:"M",age:60,diag:"general",psico:false},
+  {num:"102B",name:"López, J.",occ:true,sex:"M",age:55,diag:"general",psico:false},
+  {num:"103A",name:"Martínez, C.",occ:true,sex:"F",age:29,diag:"aborto",psico:false},
+  {num:"103B",name:"Rodríguez, A.",occ:true,sex:"F",age:32,diag:"materna",psico:false},
+  {num:"104A",name:"Hernández, P.",occ:true,sex:"M",age:48,diag:"general",psico:false},
+  {num:"104B",name:"Díaz, S.",occ:true,sex:"M",age:52,diag:"oncologico",psico:false},
+  {num:"105A",name:"Gómez, F.",occ:true,sex:"F",age:67,diag:"general",psico:false},
+  {num:"105B",name:"González, K.",occ:true,sex:"F",age:41,diag:"general",psico:false},
+  {num:"106A",name:"Vargas, D.",occ:true,sex:"M",age:33,diag:"general",psico:false},
+  {num:"106B",name:"Castro, N.",occ:true,sex:"M",age:71,diag:"general",psico:false},
+  {num:"107A",name:"Jiménez, O.",occ:true,sex:"F",age:44,diag:"psiquiatrico",psico:true},
+  {num:"107B",name:"Moreno, E.",occ:true,sex:"F",age:39,diag:"general",psico:false},
+  {num:"108A",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"108B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"109A",name:"Pedroza, M.",occ:true,sex:"M",age:42,diag:"general",psico:false},
+  {num:"109B",name:"Quintero, F.",occ:true,sex:"M",age:58,diag:"general",psico:false},
+  {num:"110A",name:"Sánchez, P.",occ:true,sex:"F",age:31,diag:"materna",psico:false},
+  {num:"110B",name:"Nieto, A.",occ:true,sex:"F",age:45,diag:"general",psico:false},
+  {num:"111A",name:"Osorio, G.",occ:true,sex:"M",age:67,diag:"general",psico:false},
+  {num:"111B",name:"Parra, H.",occ:true,sex:"M",age:53,diag:"oncologico",psico:false},
+  {num:"112A",name:"Cardona, R.",occ:true,sex:"F",age:39,diag:"general",psico:false},
+  {num:"112B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"113A",name:"Ávila, S.",occ:true,sex:"M",age:44,diag:"general",psico:false},
+  {num:"113B",name:"Bejarano, T.",occ:true,sex:"M",age:72,diag:"general",psico:false},
+  {num:"114A",name:"Zapata, L.",occ:true,sex:"F",age:27,diag:"materna",psico:false},
+  {num:"114B",name:"Castaño, V.",occ:true,sex:"F",age:61,diag:"general",psico:false},
+  {num:"115A",name:"Giraldo, W.",occ:true,sex:"M",age:49,diag:"general",psico:false},
+  {num:"115B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false}
+];
+// Piso 2: hab. 201-218 individuales (1 cama), hab. 219-230 dobles (A y B)
+const bedsFloor2=[
+  // ── Habitaciones individuales 201–218 ──────────────────
+  {num:"201",name:"Suárez, B.",occ:true,sex:"F",age:28,diag:"general",psico:false},
+  {num:"202",name:"Flores, H.",occ:true,sex:"M",age:50,diag:"general",psico:false},
+  {num:"203",name:"Cruz, V.",occ:true,sex:"F",age:72,diag:"oncologico",psico:false},
+  {num:"204",name:"Mendoza, X.",occ:true,sex:"M",age:38,diag:"general",psico:false},
+  {num:"205",name:"Silva, K.",occ:true,sex:"F",age:33,diag:"materna",psico:false},
+  {num:"206",name:"Romero, U.",occ:true,sex:"M",age:47,diag:"general",psico:false},
+  {num:"207",name:"Ortega, W.",occ:true,sex:"M",age:44,diag:"infeccioso",psico:false},
+  {num:"208",name:"Ríos, Q.",occ:true,sex:"F",age:62,diag:"general",psico:false},
+  {num:"209",name:"Espinoza, J.",occ:true,sex:"M",age:44,diag:"general",psico:false},
+  {num:"210",name:"Varela, A.",occ:true,sex:"F",age:40,diag:"materna",psico:false},
+  {num:"211",name:"Castillo, D.",occ:true,sex:"M",age:63,diag:"general",psico:false},
+  {num:"212",name:"Peña, C.",occ:true,sex:"F",age:48,diag:"general",psico:false},
+  {num:"213",name:"Rojas, L.",occ:true,sex:"M",age:52,diag:"general",psico:false},
+  {num:"214",name:"Navarro, M.",occ:true,sex:"F",age:33,diag:"materna",psico:false},
+  {num:"215",name:"Cárdenas, P.",occ:true,sex:"M",age:38,diag:"general",psico:false},
+  {num:"216",name:"Blanco, S.",occ:true,sex:"F",age:49,diag:"general",psico:false},
+  {num:"217",name:"Méndez, T.",occ:true,sex:"M",age:56,diag:"general",psico:false},
+  {num:"218",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  // ── Habitaciones dobles 219–230 (A y B) ───────────────
+  {num:"219A",name:"Molina, W.",occ:true,sex:"M",age:65,diag:"oncologico",psico:false},
+  {num:"219B",name:"Cabrera, X.",occ:true,sex:"M",age:58,diag:"general",psico:false},
+  {num:"220A",name:"Arias, Y.",occ:true,sex:"F",age:51,diag:"general",psico:false},
+  {num:"220B",name:"Restrepo, A.",occ:true,sex:"F",age:29,diag:"materna",psico:false},
+  {num:"221A",name:"Torres, B.",occ:true,sex:"M",age:46,diag:"general",psico:false},
+  {num:"221B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"222A",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"222B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"223A",name:"Reyes, T.",occ:true,sex:"F",age:35,diag:"materna",psico:false},
+  {num:"223B",name:"Guerrero, E.",occ:true,sex:"F",age:58,diag:"general",psico:false},
+  {num:"224A",name:"Ramos, I.",occ:true,sex:"M",age:22,diag:"general",psico:false},
+  {num:"224B",name:"López, J.",occ:true,sex:"M",age:55,diag:"general",psico:false},
+  {num:"225A",name:"Herrera, J.",occ:true,sex:"M",age:31,diag:"general",psico:true},
+  {num:"225B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"226A",name:"Lozano, K.",occ:true,sex:"M",age:53,diag:"oncologico",psico:false},
+  {num:"226B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"227A",name:"Santos, I.",occ:true,sex:"F",age:58,diag:"general",psico:false},
+  {num:"227B",name:"Mora, N.",occ:true,sex:"F",age:60,diag:"general",psico:false},
+  {num:"228A",name:"Serrano, R.",occ:true,sex:"M",age:70,diag:"general",psico:false},
+  {num:"228B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false},
+  {num:"229A",name:"Ibáñez, Q.",occ:true,sex:"F",age:25,diag:"materna",psico:false},
+  {num:"229B",name:"Fuentes, V.",occ:true,sex:"F",age:37,diag:"general",psico:false},
+  {num:"230A",name:"Acosta, U.",occ:true,sex:"M",age:43,diag:"general",psico:false},
+  {num:"230B",name:"Libre",occ:false,sex:null,age:null,diag:null,psico:false}
+];
+
+let selBedE=null,curFloorE=1,curFloorI=1,analysisResults={},ingPaciente={};
+
+function initials(n){if(!n||n==='Libre')return'';const p=n.split(',');return((p[0].trim()[0]||'')+(p[1]?p[1].trim()[0]:'')).toUpperCase()}
+function isNino(a){return a!==null&&a<18}
+
+function updateStats(){
+  const all=[...bedsFloor1,...bedsFloor2];
+  const occ=all.filter(b=>b.occ).length,free=all.filter(b=>!b.occ).length;
+  const pct=Math.round(occ/all.length*100);
+  document.getElementById('statOcc').textContent=occ;
+  document.getElementById('statFree').textContent=free;
+  const pe=document.getElementById('statPct');
+  pe.textContent=pct+'%';
+  pe.style.color=pct>=90?'var(--red)':pct>=75?'var(--amber)':'var(--c900)';
+  const f=document.getElementById('kpiFill');
+  f.style.width=pct+'%';
+  f.style.background=pct>=90?'var(--red)':pct>=75?'var(--amber)':'var(--green)';
+}
+
+/* ── Egreso ── */
+function renderBedsE(){
+  const beds=curFloorE===1?bedsFloor1:bedsFloor2;
+  const g=document.getElementById('bgE');g.innerHTML='';
+  beds.forEach(b=>{
+    const sel=selBedE&&selBedE.num===b.num;
+    const d=document.createElement('div');
+    d.className='bc'+(b.occ?' b-occ':' b-empty')+(sel?' b-sel':'');
+    const dot=b.occ?`<span class="bdot" style="background:${DIAG_DOT[b.diag]||'#94A3B8'}"></span>`:'';
+    const av=b.occ?`<div class="bav av-${b.sex}">${initials(b.name)}</div>`:`<div class="bav av-free"><i class="ti ti-bed"></i></div>`;
+    d.innerHTML=`${dot}${av}<div class="bnum">${b.num}</div><div class="bname">${b.occ?b.name.split(',')[0]:'Libre'}</div>`;
+    if(b.occ)d.onclick=()=>selectBedE(b);
+    g.appendChild(d);
+  });
+}
+
+function selectBedE(b){
+  selBedE=b;renderBedsE();
+  const h=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('cemptyE').style.display='none';
+  document.getElementById('cdetE').style.display='block';
+  document.getElementById('confCama').textContent=b.num;
+  document.getElementById('confPac').textContent=b.name;
+  document.getElementById('confPiso').textContent='Piso '+curFloorE;
+  document.getElementById('confHora').textContent=h;
+  document.getElementById('sendE').disabled=false;
+  document.getElementById('toastE').classList.add('hidden');
+}
+
+function resetConfirmE(){
+  document.getElementById('cemptyE').style.display='block';
+  document.getElementById('cdetE').style.display='none';
+  document.getElementById('sendE').disabled=true;
+}
+
+function setFloorE(f,el){
+  curFloorE=f;selBedE=null;
+  document.querySelectorAll('#fpE .fpill').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');renderBedsE();resetConfirmE();
+}
+
+function sendEgreso(){
+  if(!selBedE)return;
+  const btn=document.getElementById('sendE');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader" style="font-size:18px;animation:spin .8s linear infinite"></i> Enviando notificaciones...';
+  const bfree=selBedE,floor=curFloorE;
+  setTimeout(()=>{
+    btn.innerHTML='<i class="ti ti-brand-whatsapp" style="font-size:18px"></i> Confirmar egreso y notificar';
+    const arr=floor===1?bedsFloor1:bedsFloor2,bed=arr.find(b=>b.num===bfree.num);
+    if(bed){bed.occ=false;bed.name='Libre';bed.sex=null;bed.age=null;bed.diag=null;bed.psico=false;}
+    updateStats();
+    const t=document.getElementById('toastE');t.classList.remove('hidden');
+    document.getElementById('tmsgE').textContent=`4 notificaciones enviadas — Cama ${bfree.num} liberada · Piso ${floor}`;
+    selBedE=null;resetConfirmE();renderBedsE();
+    setTimeout(()=>t.classList.add('hidden'),5000);
+  },1400);
+}
+
+/* ── Evaluación ── */
+function evaluateBed(eb,pac){
+  const issues=[],tags=[];let score=100;
+  const fb=eb.num.startsWith('1')?bedsFloor1:bedsFloor2;
+  // Habitación doble = tiene sufijo A o B; individual = sin sufijo (201-218)
+  const isDouble=eb.num.endsWith('A')||eb.num.endsWith('B');
+  const base=eb.num.replace(/[AB]$/,''),isA=eb.num.endsWith('A');
+  const partner=isDouble?fb.find(b=>b.num===(isA?base+'B':base+'A')):null;
+  const hasRM=partner&&partner.occ;
+
+  if(pac.diag==='infeccioso'){
+    if(isDouble){issues.push({type:'block',msg:'Requiere habitación individual (infeccioso)'});score=0;}
+    else{tags.push({type:'ok',text:'Hab. individual — apta para infeccioso'});}
+  }
+  if(pac.psico.abuso||pac.psico.bala||pac.psico.salud||pac.psico.legal){
+    if(isDouble){issues.push({type:'block',msg:'Criterio psicosocial — habitación individual obligatoria'});score=0;}
+    else{tags.push({type:'ok',text:'Hab. individual — compatible con criterio psicosocial'});}
+  }
+
+  if(hasRM&&score>0){
+    const rm=partner;
+    if(rm.diag==='infeccioso'){issues.push({type:'block',msg:'Compañero con diagnóstico infeccioso'});score=0;}
+    if(rm.psico){issues.push({type:'block',msg:'Compañero con criterio psicosocial activo'});score=0;}
+    if(pac.sex&&rm.sex&&pac.sex!==rm.sex){issues.push({type:'block',msg:'Sexo incompatible con compañero ('+(rm.sex==='M'?'masculino':'femenino')+')'});score=0;}
+    if(isNino(pac.edad)!==isNino(rm.age)){issues.push({type:'block',msg:'No se puede combinar adulto con menor de edad'});score=0;}
+    if(pac.diag==='materna'&&rm.diag==='aborto'){issues.push({type:'block',msg:'Materna no puede compartir con diagnóstico de aborto'});score=0;}
+    if(pac.diag==='aborto'&&rm.diag==='materna'){issues.push({type:'block',msg:'No puede compartir habitación con paciente materna'});score=0;}
+    if(pac.diag==='psiquiatrico'&&score>0){issues.push({type:'warn',msg:'Psiquiátrico — evaluar si requiere habitación individual'});score=Math.min(score,50);}
+    if(!issues.length){tags.push({type:'ok',text:'Mismo sexo'});tags.push({type:'ok',text:isNino(pac.edad)?'Ambos menores':'Ambos adultos'});tags.push({type:'ok',text:'Diagnósticos compatibles'});}
+  } else if(!hasRM){
+    if(!tags.some(t=>t.text.includes('individual')))tags.push({type:'ok',text:'Habitación individual'});
+  }
+  const status=score===0?'block':issues.some(i=>i.type==='warn')?'warn':'ok';
+  return{status,issues,tags,score,hasRM,partner};
+}
+
+/* ── Ingreso render ── */
+function renderBedsI(){
+  const beds=curFloorI===1?bedsFloor1:bedsFloor2;
+  const g=document.getElementById('bgI');g.innerHTML='';
+  beds.forEach(b=>{
+    const d=document.createElement('div');
+    if(!b.occ){
+      const res=analysisResults[b.num];
+      if(res){
+        if(res.status==='ok'){d.className='bc b-rec';d.innerHTML=`<div class="bav av-rec"><i class="ti ti-check"></i></div><div class="bnum">${b.num}</div><div class="bname">Disponible</div>`;}
+        else if(res.status==='warn'){d.className='bc b-cau';d.innerHTML=`<div class="bav av-cau"><i class="ti ti-alert-triangle"></i></div><div class="bnum">${b.num}</div><div class="bname">Revisar</div>`;}
+        else{d.className='bc b-blk';d.innerHTML=`<div class="bav av-blk"><i class="ti ti-x"></i></div><div class="bnum">${b.num}</div><div class="bname">No apta</div>`;}
+      } else {
+        d.className='bc b-empty';d.innerHTML=`<div class="bav av-free"><i class="ti ti-bed"></i></div><div class="bnum">${b.num}</div><div class="bname">Libre</div>`;
+      }
+    } else {
+      d.className='bc b-occ';
+      d.innerHTML=`<span class="bdot" style="background:${DIAG_DOT[b.diag]||'#94A3B8'}"></span><div class="bav av-${b.sex}">${initials(b.name)}</div><div class="bnum">${b.num}</div><div class="bname">${b.name.split(',')[0]}</div>`;
+    }
+    g.appendChild(d);
+  });
+}
+
+function renderRecDetail(){
+  const list=document.getElementById('recList'),empty=document.getElementById('recEmpty');
+  const avail=Object.entries(analysisResults);
+  if(!avail.length){empty.style.display='block';list.innerHTML='';return;}
+  empty.style.display='none';
+  const ord={ok:0,warn:1,block:2};
+  list.innerHTML=avail.sort((a,b)=>ord[a[1].status]-ord[b[1].status]).map(([num,res])=>{
+    const bc=res.status==='ok'?'rb-ok':res.status==='warn'?'rb-warn':'rb-blk';
+    const bl=res.status==='ok'?'✓ Apta':res.status==='warn'?'⚠ Revisar':'✕ No apta';
+    const tags=res.tags.map(t=>`<span class="rtag rt-${t.type}">${t.text}</span>`).join('');
+    const issues=res.issues.map(i=>`<span class="rtag rt-${i.type==='block'?'block':'warn'}">${i.msg}</span>`).join('');
+    const room=res.hasRM
+      ?`<div class="rroom"><i class="ti ti-user" style="font-size:11px"></i> Compañero: ${res.partner.name} · ${res.partner.sex==='M'?'M':'F'} · ${res.partner.age}a · ${res.partner.diag}</div>`
+      :`<div class="rroom"><i class="ti ti-user-off" style="font-size:11px"></i> Sin compañero de habitación</div>`;
+    const btn=res.status!=='block'?`<button class="assign-btn" onclick="assignBed('${num}')"><i class="ti ti-check"></i> Asignar cama ${num}</button>`:'';
+    return `<div class="rrow"><div class="rbadge ${bc}">${bl}</div><div style="flex:1"><div class="rnum">Cama ${num} · Piso ${num.startsWith('1')?'1':'2'}</div>${room}<div class="rtags">${tags}${issues}</div>${btn}</div></div>`;
+  }).join('');
+}
+
+function analyzeIngreso(){
+  const nombre=document.getElementById('ingNombre').value.trim();
+  const edad=parseInt(document.getElementById('ingEdad').value);
+  const sexo=document.getElementById('ingSexo').value;
+  const diag=document.getElementById('ingDiag').value;
+  const abuso=document.getElementById('pAbuso').checked,bala=document.getElementById('pBala').checked;
+  const salud=document.getElementById('pSalud').checked,legal=document.getElementById('pLegal').checked;
+
+  if(!nombre||!sexo||!diag||isNaN(edad)){
+    const btn=document.getElementById('analyzeBtn');
+    btn.style.background='var(--danger)';
+    btn.innerHTML='<i class="ti ti-alert-circle"></i> Complete todos los campos requeridos';
+    setTimeout(()=>{btn.style.background='var(--purple)';btn.innerHTML='<i class="ti ti-search"></i> Analizar disponibilidad y recomendar';},2200);
+    return;
+  }
+
+  ingPaciente={nombre,edad,sexo,diag,psico:{abuso,bala,salud,legal}};
+  analysisResults={};
+  [...bedsFloor1,...bedsFloor2].filter(b=>!b.occ).forEach(b=>{analysisResults[b.num]=evaluateBed(b,ingPaciente);});
+
+  document.getElementById('recWrap').classList.remove('hidden');
+  const aw=document.getElementById('alertsWrap');aw.innerHTML='';
+  const hp=abuso||bala||salud||legal;
+  if(diag==='infeccioso')aw.innerHTML+=`<div class="alert a-danger"><i class="ti ti-virus"></i><span>Diagnóstico infeccioso — el paciente debe estar en <strong>habitación individual</strong>. Notificar a coordinación si no hay disponibilidad.</span></div>`;
+  if(hp)aw.innerHTML+=`<div class="alert a-warn"><i class="ti ti-shield-exclamation"></i><span>Criterio psicosocial activo — se requiere <strong>habitación individual</strong> y notificación a trabajo social.</span></div>`;
+  if(diag==='aborto')aw.innerHTML+=`<div class="alert a-warn"><i class="ti ti-heart-off"></i><span>No asignar en la misma habitación que una paciente materna.</span></div>`;
+  if(isNino(edad))aw.innerHTML+=`<div class="alert a-warn"><i class="ti ti-baby-carriage"></i><span>Paciente menor de edad — no puede compartir habitación con adultos.</span></div>`;
+
+  renderBedsI();renderRecDetail();
+  document.getElementById('toastI').classList.add('hidden');
+}
+
+function assignBed(num){
+  const all=[...bedsFloor1,...bedsFloor2],bed=all.find(b=>b.num===num);
+  if(bed){bed.occ=true;bed.name=ingPaciente.nombre;bed.sex=ingPaciente.sexo;bed.age=ingPaciente.edad;bed.diag=ingPaciente.diag;bed.psico=ingPaciente.psico.abuso||ingPaciente.psico.bala||ingPaciente.psico.salud||ingPaciente.psico.legal;}
+  updateStats();
+  const t=document.getElementById('toastI');t.classList.remove('hidden');
+  document.getElementById('tmsgI').textContent=`${ingPaciente.nombre||'Paciente'} asignado/a a cama ${num} — registro enviado a admisiones.`;
+  document.getElementById('recWrap').classList.add('hidden');
+  ['ingNombre','ingEdad','ingSexo','ingDiag'].forEach(id=>document.getElementById(id).value='');
+  ['pAbuso','pBala','pSalud','pLegal'].forEach(id=>document.getElementById(id).checked=false);
+  setTimeout(()=>t.classList.add('hidden'),5000);
+}
+
+function setFloorI(f,el){
+  curFloorI=f;
+  document.querySelectorAll('#fpI .fpill').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');renderBedsI();
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
+  document.getElementById('tc-'+tab).classList.add('on');
+}
+
+function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});}
+
+updateClock();setInterval(updateClock,30000);
+updateStats();renderBedsE();
+</script>
+</body>
+</html>

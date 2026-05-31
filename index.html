@@ -57,6 +57,7 @@
   .bed-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(239,68,68,0.7); }
   .bed-number { font-family: var(--mono); font-size: 36px; font-weight: 500; color: #ef4444; line-height: 1; }
   .bed-floor { font-size: 13px; color: rgba(239,68,68,0.8); }
+  .cama-badge { font-size: 11px; font-weight: 600; color: #ef4444; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); padding: 2px 8px; border-radius: 5px; font-family: var(--mono); letter-spacing: 1px; }
   .bed-time { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
 
   .badge-pendiente {
@@ -117,13 +118,17 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// Estructura real del servicio:
+// Piso 1: hab. 101–115, dos camas por hab. (A y B) = 30 camas
+// Piso 2: hab. 201–218, una cama (sin letra)  = 18 camas
+//         hab. 219–230, dos camas por hab. (A y B) = 24 camas
 const DATOS = [
-  { timestamp: '30/05/2026 1:03:38', piso: 'Piso 1', habitacion: '103' },
-  { timestamp: '30/05/2026 1:04:11', piso: 'Piso 2', habitacion: '203' },
-  { timestamp: '30/05/2026 1:05:14', piso: 'Piso 1', habitacion: '107' },
-  { timestamp: '30/05/2026 1:05:21', piso: 'Piso 2', habitacion: '213' },
-  { timestamp: '30/05/2026 1:18:44', piso: 'Piso 1', habitacion: '101' },
-  { timestamp: '30/05/2026 1:22:09', piso: 'Piso 2', habitacion: '208' },
+  { timestamp: '30/05/2026 1:03:38', piso: 'Piso 1', habitacion: '103', cama: 'A' },
+  { timestamp: '30/05/2026 1:04:11', piso: 'Piso 2', habitacion: '203', cama: null },
+  { timestamp: '30/05/2026 1:05:14', piso: 'Piso 1', habitacion: '107', cama: 'B' },
+  { timestamp: '30/05/2026 1:05:21', piso: 'Piso 2', habitacion: '213', cama: null },
+  { timestamp: '30/05/2026 1:18:44', piso: 'Piso 1', habitacion: '101', cama: 'A' },
+  { timestamp: '30/05/2026 1:22:09', piso: 'Piso 2', habitacion: '225', cama: 'B' },
 ];
 
 let beds = {};
@@ -175,16 +180,18 @@ function toggleSound() {
 
 function cargarDatos() {
   const nuevas = [];
-  DATOS.forEach((row, i) => {
-    const id = `${row.piso}-${row.habitacion}`;
+  DATOS.forEach((row) => {
+    const id = `${row.piso}-${row.habitacion}${row.cama ? row.cama : ''}`;
     if (!beds[id]) {
-      beds[id] = { id, number: row.habitacion, floor: row.piso, timestamp: row.timestamp };
+      beds[id] = { id, number: row.habitacion, cama: row.cama || null, floor: row.piso, timestamp: row.timestamp };
       nuevas.push(id);
     }
   });
   if (nuevas.length) {
     playAlert();
-    showToast(`Nueva cama registrada: Hab. ${nuevas.map(id => beds[id].number).join(', ')}`);
+    showToast(`Nueva cama registrada: Hab. ${nuevas.map(id => {
+      const b = beds[id]; return b.cama ? `${b.number}-${b.cama}` : b.number;
+    }).join(', ')}`);
   }
   renderBeds(nuevas);
   updateStats();
@@ -219,6 +226,7 @@ function bedCard(bed, isNew) {
     <div class="bed-card${isNew ? ' nueva' : ''}">
       <div class="bed-label">Habitación</div>
       <div class="bed-number">${bed.number}</div>
+      ${bed.cama ? `<span class="cama-badge">Cama ${bed.cama}</span>` : ''}
       <div class="bed-floor">${bed.floor}</div>
       ${timeStr ? `<div class="bed-time">Reportada a las ${timeStr}</div>` : ''}
       <div class="badge-pendiente"><span class="badge-dot"></span>Pendiente de limpieza</div>
